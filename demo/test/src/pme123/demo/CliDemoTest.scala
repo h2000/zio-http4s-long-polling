@@ -1,7 +1,6 @@
 package pme123.demo
 
-import pme123.demo.CliDemo.{Cmd, Echo, Quit, State}
-import zio.ZIO
+import pme123.demo.CliDemo.{Echo, Quit, State}
 import zio.test.Assertion._
 import zio.test._
 import zio.test.environment.{TestConsole, TestEnvironment}
@@ -27,8 +26,7 @@ object CliDemoTest extends DefaultRunnableSpec {
       suite("gen")(
         testM("gen") {
           checkM(Gen.alphaNumericString.filter(c => c != "b" && c != "q")) {
-            input => assertM(CliDemo.parser(input).run)
-            (succeeds(equalTo(Echo(input))))
+            input => assertM(CliDemo.parser(input).run)(succeeds(equalTo(Echo(input))))
           }
         })
       ,
