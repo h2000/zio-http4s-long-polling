@@ -5,13 +5,15 @@ trait MyModule extends ScalaModule {
   def scalaVersion = "2.13.1"
 
   object version {
-    val cats = "2.0.0"
+    val cats = "2.1.1"
+
     val circe = "0.12.1"
     val http4s = "0.21.0-M4"
     val sttp = "2.0.3"
-    val zio = "1.0.0-RC18"
-    val zioCats = "2.0.0.0-RC11"
-    val zioConfig = "1.0.0-RC6"
+    val zio = "1.0.0-RC21-1"
+    val zioCats = "2.1.3.0-RC16"
+    val zioConfig = "1.0.0-RC23-1"
+    val zioLogging = "0.3.2"
   }
 
   object libs {
@@ -31,24 +33,16 @@ trait MyModule extends ScalaModule {
     val zio = ivy"dev.zio::zio:${version.zio}"
     val zioStream = ivy"dev.zio::zio-streams:${version.zio}"
     val zioCats = ivy"dev.zio::zio-interop-cats:${version.zioCats}"
+    val zioLogging = ivy"dev.zio::zio-logging:${version.zioLogging}"
+    val zioLoggingSlf4j = ivy"dev.zio::zio-logging-slf4j:${version.zioLogging}"
+
+    val zioTest = ivy"dev.zio::zio-test:${version.zio}"
+    val zioTestSbt = ivy"dev.zio::zio-test-sbt:${version.zio}"
   }
 
-  object test extends Tests {
-    override def ivyDeps = Agg(
-      ivy"dev.zio::zio-test:${version.zio}",
-      ivy"dev.zio::zio-test-sbt:${version.zio}"
-    )
-
-    def testOne(args: String*) = T.command {
-      super.runMain("org.scalatest.run", args: _*)
-    }
-
-    def testFrameworks =
-      Seq("zio.test.sbt.ZTestFramework")
-  }
-
-  override def scalacOptions =
+  override def scalacOptions = T {
     defaultScalaOpts
+  }
 
   val defaultScalaOpts = Seq(
     "-deprecation", // Emit warning and location for usages of deprecated APIs.
@@ -92,9 +86,41 @@ object client extends MyModule {
       libs.circeGeneric,
       libs.zio,
       libs.zioStream,
-      libs.zioCats
+      libs.zioCats,
+      libs.zioLogging,
+      libs.zioLoggingSlf4j
     )
   }
+}
+
+object demo extends MyModule {
+  override def ivyDeps = {
+    Agg(
+      libs.zio,
+      libs.zioStream,
+      libs.zioLogging,
+      libs.zioLoggingSlf4j
+    )
+  }
+
+  object test extends MyModule {
+    override def moduleDeps = Seq(demo)
+
+    override def ivyDeps = {
+      Agg(
+        libs.zio,
+        libs.zioTest
+      )
+    }
+
+    def testOne(args: String*) = T.command {
+      super.runMain("org.scalatest.run", args: _*)
+    }
+
+    def testFrameworks =
+      Seq("zio.test.sbt.ZTestFramework")
+  }
+
 }
 
 

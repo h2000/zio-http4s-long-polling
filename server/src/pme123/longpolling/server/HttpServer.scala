@@ -37,11 +37,11 @@ object HttpServer extends App {
           .foldM(_ => InternalServerError(), Ok(_))
     }
 
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
+  def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
     program
       .foldM(
-        err => putStrLn(s"Program failed: $err").as(1),
-        v => putStrLn(s"Program succeded: $v").as(0)
+        err => putStrLn(s"Program failed: $err").as(ExitCode.failure),
+        v => putStrLn(s"Program succeded: $v").as(ExitCode.success)
       )
 
   private def program = {

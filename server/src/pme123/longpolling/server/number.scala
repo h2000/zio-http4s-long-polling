@@ -34,8 +34,8 @@ object number {
                 effectBlocking {
                   rts.unsafeRun(
                     for {
-                      count <- random.nextInt(10)
-                      nr <- random.nextInt(6000)
+                      count <- random.nextIntBounded(10)
+                      nr <- random.nextIntBounded(6000)
                       _ <- ZIO.sleep(nr.millis)
                       _ <- queue.offerAll((1 to (count + 1)).map(nr / _))
                     } yield ()
@@ -79,8 +79,8 @@ object number {
             for {
               numbers <- getAtLeastOne(qu, maxDuration)
               _ <-  // add some random exception
-                ZIO.fail(new IllegalStateException(s"Problem generating number ${numbers.head} > 5500"))
-                  .when(numbers.nonEmpty && numbers.head > 5500)
+                ZIO.fail(new IllegalStateException(s"Problem generating number ${numbers.head} > 4000"))
+                  .when(numbers.nonEmpty && numbers.head > 4000)
             } yield numbers
         }
       }

@@ -14,9 +14,9 @@ import zio.duration._
 
 object HttpClient extends zio.App {
 
-  def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] =
+  def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] =
     program
-      .fold(_ => -1, _ => 0)
+      .fold(_ => ExitCode.failure, _ => ExitCode.success)
 
   def program: ZIO[ZEnv, Throwable, Unit] =
     (for {
@@ -50,7 +50,7 @@ object HttpClient extends zio.App {
       .tapError(error =>
         for {
           t <- clock.currentTime(TimeUnit.SECONDS)
-          _ <- console.putStrLn(s"Failing attempt (${t % 100} s): ${error.getMessage}")
+          _ <- console.putStrLn(s"Failing attempt (${t % 100} s): ${error.getMessage}\n${error.getStackTrace.toList.map(_.toString + "\n")}")
         } yield ()
       )
       .retry(Schedule.recurs(5) && Schedule.exponential(1.second))
