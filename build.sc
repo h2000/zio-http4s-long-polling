@@ -10,10 +10,14 @@ trait MyModule extends ScalaModule {
     val circe = "0.12.1"
     val http4s = "0.21.0-M4"
     val sttp = "2.0.3"
-    val zio = "1.0.0-RC21-1"
+
+    val zio = "1.0.0-RC21-2"
     val zioCats = "2.1.3.0-RC16"
     val zioConfig = "1.0.0-RC23-1"
     val zioLogging = "0.3.2"
+
+    val slick =  "3.3.2"
+    val h2 = "1.4.200"
   }
 
   object libs {
@@ -30,6 +34,9 @@ trait MyModule extends ScalaModule {
     val sttpClient =
       ivy"com.softwaremill.sttp.client::async-http-client-backend-zio:${version.sttp}"
     val sttpCirce = ivy"com.softwaremill.sttp.client::circe::${version.sttp}"
+
+    val slick = ivy"com.typesafe.slick::slick:${version.slick}"
+
     val zio = ivy"dev.zio::zio:${version.zio}"
     val zioStream = ivy"dev.zio::zio-streams:${version.zio}"
     val zioCats = ivy"dev.zio::zio-interop-cats:${version.zioCats}"
@@ -38,6 +45,12 @@ trait MyModule extends ScalaModule {
 
     val zioTest = ivy"dev.zio::zio-test:${version.zio}"
     val zioTestSbt = ivy"dev.zio::zio-test-sbt:${version.zio}"
+    val zioIntRS   = ivy"dev.zio::zio-interop-reactivestreams:1.0.3.5-RC12"
+    val zioIntSlick = ivy"io.scalac::zio-slick-interop:0.1.0"
+
+    val h2 = ivy"com.h2database:h2:${version.h2}"
+    val javaFaker = ivy"com.github.javafaker:javafaker:0.15"
+    val logback = ivy"ch.qos.logback:logback-classic:1.2.3"
   }
 
   override def scalacOptions = T {
@@ -99,7 +112,13 @@ object demo extends MyModule {
       libs.zio,
       libs.zioStream,
       libs.zioLogging,
-      libs.zioLoggingSlf4j
+      libs.zioLoggingSlf4j,
+      libs.logback,
+      libs.h2,
+      libs.slick,
+      libs.zioIntRS,
+      libs.zioIntSlick,
+      libs.javaFaker
     )
   }
 
