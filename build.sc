@@ -51,7 +51,7 @@ trait MyModule extends ScalaModule {
     val h2 = ivy"com.h2database:h2:${version.h2}"
     val javaFaker = ivy"com.github.javafaker:javafaker:0.15"
     val logback = ivy"ch.qos.logback:logback-classic:1.2.3"
-    val prettyPrint = "com.lihaoyi::pprint:0.5.6"
+    val prettyPrint = ivy"com.lihaoyi::pprint:0.5.6"
   }
 
   override def scalacOptions = T {
@@ -119,7 +119,8 @@ object demo extends MyModule {
       libs.slick,
       libs.zioIntRS,
       libs.zioIntSlick,
-      libs.javaFaker
+      libs.javaFaker,
+      libs.prettyPrint
     )
   }
 

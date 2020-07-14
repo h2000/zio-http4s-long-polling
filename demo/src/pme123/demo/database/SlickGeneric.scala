@@ -117,5 +117,5 @@ object SlickGenericApp extends App {
     } yield cs
 
   val cs = Await.result(csF, Duration(1, TimeUnit.SECONDS))
-  cs.foreach(c => println(c))
+  cs.foreach(c => pprint.log(c, width = 500))
 }
