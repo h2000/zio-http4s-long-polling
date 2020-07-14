@@ -4,11 +4,13 @@
             <pattern>*** \(%logger{100}\)%green(%X{debugId}) %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
     </root>
-<!--    <logger name="slick.compiler" level="INFO"/>-->
-<!--    <logger name="slick.relational.ResultConverterCompiler" level="INFO"/>-->
-<!--    <logger name="slick.jdbc.JdbcBackend" level="INFO"/>-->
-    <logger name="slick.jdbc.StatementInvoker.result" level="DEBUG"/>
+    <logger name="slick.compiler" level="INFO"/>
+    <logger name="slick.relational.ResultConverterCompiler" level="INFO"/>
+    <logger name="slick.jdbc.JdbcBackend" level="INFO"/>
+    <!--    <logger name="slick.jdbc.StatementInvoker.result" level="DEBUG"/>-->
+    <!--    <logger name="slick.jdbc.JdbcBackend.statement"  level="DEBUG" />-->
+    <logger name="h2database" level="info"/>
 </configuration>

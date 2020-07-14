@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import pme123.demo.database.Model.{Group, User, UserGroup}
 import slick.jdbc.JdbcProfile
-import slick.lifted.ProvenShape
+import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
 object DbTables extends JdbcProfile {
 
@@ -54,6 +54,11 @@ object DbTables extends JdbcProfile {
     def groupId: Rep[Long] = column[Long]("groupId", O.SqlType("BIGINT"))
 
     override def * : ProvenShape[UserGroup] = (userId, groupId) <> (UserGroup.tupled, UserGroup.unapply)
+
+    // ForeignKyes
+    def user: ForeignKeyQuery[UserTable, User] = foreignKey("fk_user_group__user", userId, users)(_.id /*, onDelete = */)
+
+    def group: ForeignKeyQuery[GroupTable, Group] = foreignKey("fk_user_group__group", groupId, groups)(_.id /*, onDelete = */)
   }
 
   val userGroups: TableQuery[UserGroupTable] = TableQuery[UserGroupTable]
