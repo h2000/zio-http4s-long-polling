@@ -12,7 +12,7 @@ import zio.clock.Clock
 import zio.logging.{Logging, log}
 import zio.stream.ZSink
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 
 

@@ -5,16 +5,16 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 import com.github.javafaker.Faker
+import pme123.demo.database.SlickGeneric.{Entity, EntityColumns, EntityRepository, EntityTable}
 import slick.dbio.DBIOAction
 import slick.lifted.ProvenShape
-import slick.sql.SqlAction
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-
+import scala.jdk.CollectionConverters._
 
 object SlickGeneric extends slick.jdbc.JdbcProfile {
-  // these imports have to be here
+  // these imports need to stay inside
 
   import api._
   import slick.lifted.CaseClassShape
@@ -25,7 +25,7 @@ object SlickGeneric extends slick.jdbc.JdbcProfile {
 
   implicit object EntityShape extends CaseClassShape(EntityColumns.tupled, Entity.tupled)
 
-  abstract class RichTable[T](tag: Tag, name: String) extends Table[T](tag, name) {
+  abstract class EntityTable[T](tag: Tag, name: String) extends Table[T](tag, name) {
     def id: Rep[Long] = column[Long]("ID", O.PrimaryKey, O.AutoInc) // This is the primary key column
 
     def createdAt: Rep[Timestamp] = column[Timestamp]("CREATED_AT")
@@ -38,39 +38,26 @@ object SlickGeneric extends slick.jdbc.JdbcProfile {
     Entity(None, now, now)
   }
 
-  trait Crud[T <: RichTable[A], A] {
+  trait EntityRepository[T <: EntityTable[A], A] {
 
-    val tableQuery: TableQuery[T]
+    val query: TableQuery[T]
 
-    def find(id: Long): SqlAction[Option[A], NoStream, Effect.Read] =
-      tableQuery.filter(_.id === id).result.headOption
+    def find(id: Long): DBIO[Option[A]] =
+      query.filter(_.id === id).result.headOption
 
-    def findAll: SqlAction[Seq[A], NoStream, Effect.Read] =
-      tableQuery.result
+    def findAll: DBIO[Seq[A]] =
+      query.result
   }
 
-  case class City(name: String, crud: Entity)
-
-  class CityTable(tag: Tag) extends RichTable[City](tag, "CITIES") {
-    def name: Rep[String] = column[String]("NAME")
-
-    override def * : ProvenShape[City] =
-      (name, EntityColumns(id.?, createdAt, updatedAt)) <> (City.tupled, City.unapply)
-  }
-
-  val cityRepository: Crud[CityTable, City] = new Crud[CityTable, City] {
-    override val tableQuery: SlickGeneric.api.TableQuery[CityTable] = TableQuery[CityTable]
-  }
 }
 
 object SlickGenericApp extends App {
 
   import DbTables.api._
   import com.typesafe.config.ConfigFactory
-  import pme123.demo.database.SlickGeneric.{City, cityRepository, createEntity}
+  import pme123.demo.database.SlickGeneric.createEntity
 
-  import scala.collection.JavaConverters._
-
+  // -- db config
   private val config = ConfigFactory.parseMap(
     Map(
       "url" -> "jdbc:h2:mem:test1;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4",
@@ -79,7 +66,9 @@ object SlickGenericApp extends App {
     ).asJava
   )
 
+  val db = slick.jdbc.H2Profile.backend.createDatabase(config, "")
 
+  // -- execution context for scala futures / for comprehension
   object MyExecutionContext {
 
     import java.util.concurrent.Executors
@@ -92,16 +81,31 @@ object SlickGenericApp extends App {
     implicit val ioThreadPool: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(noOfThread))
   }
 
-  val db = slick.jdbc.H2Profile.backend.createDatabase(config, "")
+  // -- entity + repo
+  case class City(name: String, crud: Entity)
 
+  class CityTable(tag: Tag) extends EntityTable[City](tag, "CITIES") {
+    def name: Rep[String] = column[String]("NAME")
+
+    override def * : ProvenShape[City] =
+      (name, EntityColumns(id.?, createdAt, updatedAt)) <> (City.tupled, City.unapply)
+  }
+
+  val cityRepository: EntityRepository[CityTable, City] = new EntityRepository[CityTable, City] {
+    override val query: SlickGeneric.api.TableQuery[CityTable] = TableQuery[CityTable]
+  }
+
+  // -- demo data
   val faker = new Faker()
   val demoCities = (1 to 100).map(_ => {
     City(faker.address().cityName(), createEntity)
   })
 
-  val create = DBIOAction.seq(
-    cityRepository.tableQuery.schema.createIfNotExists,
-    cityRepository.tableQuery returning cityRepository.tableQuery.map(c => c.id) ++= demoCities
+  val create: DBIO[Unit] = DBIOAction.seq(
+    cityRepository.query.schema.createIfNotExists,
+    // return ids of newly created cities
+    (cityRepository.query returning cityRepository.query.map(c => c.id))
+      ++= demoCities
   )
 
   import MyExecutionContext.ioThreadPool

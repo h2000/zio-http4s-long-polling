@@ -16,7 +16,7 @@ trait MyModule extends ScalaModule {
     val zioConfig = "1.0.0-RC23-1"
     val zioLogging = "0.3.2"
 
-    val slick =  "3.3.2"
+    val slick = "3.3.2"
     val h2 = "1.4.200"
   }
 
@@ -45,12 +45,13 @@ trait MyModule extends ScalaModule {
 
     val zioTest = ivy"dev.zio::zio-test:${version.zio}"
     val zioTestSbt = ivy"dev.zio::zio-test-sbt:${version.zio}"
-    val zioIntRS   = ivy"dev.zio::zio-interop-reactivestreams:1.0.3.5-RC12"
+    val zioIntRS = ivy"dev.zio::zio-interop-reactivestreams:1.0.3.5-RC12"
     val zioIntSlick = ivy"io.scalac::zio-slick-interop:0.1.0"
 
     val h2 = ivy"com.h2database:h2:${version.h2}"
     val javaFaker = ivy"com.github.javafaker:javafaker:0.15"
     val logback = ivy"ch.qos.logback:logback-classic:1.2.3"
+    val prettyPrint = "com.lihaoyi::pprint:0.5.6"
   }
 
   override def scalacOptions = T {
@@ -142,4 +143,6 @@ object demo extends MyModule {
 
 }
 
+def idea(ev: mill.eval.Evaluator) =
+  mill.scalalib.GenIdea.idea(ev)
 
